@@ -1,6 +1,10 @@
 import requests
 import json
 from itertools import product
+import sys
+
+args = sys.argv
+logmode = "-l" in args
 
 def nicehash_price_info(coins):
     try:
@@ -61,6 +65,11 @@ foundcoins["BTC (via Coinbase)"] = {
     "fee": (nhinfo_coinbase["BTC"]["intervals"][0]["element"]["value"], nhinfo_coinbase["BTC"]["intervals"][0]["element"]["type"]),
     "sndfee": (0, 0)
 }
+
+if logmode:
+    json.dump(nhinfo_full, open("logs/nicehash.json", "w"))
+    json.dump(pricelist, open("logs/prices.json", "w"))
+    json.dump(foundcoins, open("logs/result.json", "w"))
 
 for coin in sorted(foundcoins.items(), key=lambda x: x[1]["minUSD"], reverse=True):
     print(coin[0], "-", round(coin[1]["minUSD"], 2), "USD", "("+str(coin[1]["mincoin"]), coin[1]["id"] + ((" or " + str(round(coin[1]["minUSD"] / foundcoins["BTC"]["price"], 5)) + " BTC") if coin[1]["id"] != "BTC" else "") + ")", "losing", round(coin[1]["price"] * (coin[1]["mincoin"] * coin[1]["fee"][0] + coin[1]["sndfee"][0]), 2), "USD", "in fees")
